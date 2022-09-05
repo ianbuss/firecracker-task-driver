@@ -56,7 +56,6 @@ func RandomVethName() (string, error) {
 	return fmt.Sprintf("veth%x", entropy), nil
 }
 
-
 type options struct {
 	FcBinary           string   `long:"firecracker-binary" description:"Path to firecracker binary"`
 	FcKernelImage      string   `long:"kernel" description:"Path to the kernel image" default:"./vmlinux"`
@@ -70,7 +69,7 @@ type options struct {
 	FcLogFifo          string   `long:"vmm-log-fifo" description:"FIFO for firecracker logs"`
 	FcLogLevel         string   `long:"log-level" description:"vmm log level" default:"Debug"`
 	FcMetricsFifo      string   `long:"metrics-fifo" description:"FIFO for firecracker metrics"`
-	FcDisableHt        bool     `long:"disable-hyperthreading" short:"t" description:"Disable CPU Hyperthreading"`
+	FcDisableSmt       bool     `long:"disable-smt" short:"t" description:"Disable CPU simultaneous multithreading"`
 	FcCPUCount         int64    `long:"ncpus" short:"c" description:"Number of CPUs" default:"1"`
 	FcCPUTemplate      string   `long:"cpu-template" description:"Firecracker CPU Template (C3 or T2)"`
 	FcMemSz            int64    `long:"memory" short:"m" description:"VM memory, in MiB" default:"512"`
@@ -125,7 +124,7 @@ func (opts *options) getFirecrackerConfig(AllocId string) (firecracker.Config, e
 		socketPath = getSocketPath()
 	}
 
-	htEnabled := !opts.FcDisableHt
+	htEnabled := !opts.FcDisableSmt
 
 	return firecracker.Config{
 		SocketPath:        socketPath,
@@ -141,10 +140,9 @@ func (opts *options) getFirecrackerConfig(AllocId string) (firecracker.Config, e
 		MachineCfg: models.MachineConfiguration{
 			VcpuCount:   firecracker.Int64(opts.FcCPUCount),
 			CPUTemplate: models.CPUTemplate(opts.FcCPUTemplate),
-			HtEnabled:   firecracker.Bool(htEnabled),
+			Smt:         firecracker.Bool(htEnabled),
 			MemSizeMib:  firecracker.Int64(opts.FcMemSz),
 		},
-		Debug: opts.Debug,
 	}, nil
 }
 
@@ -164,7 +162,7 @@ func (opts *options) getNetwork(AllocId string) ([]firecracker.NetworkInterface,
 		nic := firecracker.NetworkInterface{
 			CNIConfiguration: &firecracker.CNIConfiguration{
 				NetworkName: opts.FcNetworkName,
-				IfName:  veth,
+				IfName:      veth,
 			},
 		}
 		NICs = append(NICs, nic)

@@ -26,7 +26,7 @@ import (
 	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/nomad/client/stats"
 	"github.com/hashicorp/nomad/plugins/drivers"
-	"github.com/shirou/gopsutil/process"
+	"github.com/shirou/gopsutil/v3/process"
 	"github.com/vishvananda/netlink"
 )
 
@@ -223,7 +223,7 @@ func (h *taskHandle) shutdown(timeout time.Duration) error {
 	vnic, _ := netlink.LinkByName(h.Info.Vnic)
 	err := netlink.LinkDel(vnic)
 	if err != nil {
-			h.logger.Error("unable to remove veth ", h.Info.Vnic, " from ", h.taskConfig.ID)
+		h.logger.Error("unable to remove veth ", h.Info.Vnic, " from ", h.taskConfig.ID)
 	}
 	time.Sleep(timeout)
 	h.MachineInstance.StopVMM()
