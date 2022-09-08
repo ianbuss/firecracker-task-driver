@@ -124,8 +124,8 @@ func (d *Driver) initializeContainer(ctx context.Context, cfg *drivers.TaskConfi
 		logger.SetLevel(log.DebugLevel)
 	}
 
-	vmmCtx, vmmCancel := context.WithCancel(ctx)
-	defer vmmCancel()
+	vmmCtx, _ := context.WithCancel(ctx)
+	//defer vmmCancel()
 
 	machineOpts := []firecracker.Opt{
 		firecracker.WithLogger(log.NewEntry(logger)),

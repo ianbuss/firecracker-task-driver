@@ -127,11 +127,11 @@ func (h *taskHandle) run() {
 func (h *taskHandle) stats(ctx context.Context, statsChannel chan *drivers.TaskResourceUsage, interval time.Duration) {
 	defer close(statsChannel)
 	timer := time.NewTimer(0)
-	h.logger.Debug("Starting stats collection for ", h.taskConfig.ID)
+	h.logger.Debug("Starting stats collection", "id", h.taskConfig.ID)
 	for {
 		select {
 		case <-ctx.Done():
-			h.logger.Debug("Stopping stats collection for ", h.taskConfig.ID)
+			h.logger.Debug("Stopping stats collection", "id", h.taskConfig.ID)
 			return
 		case <-timer.C:
 			timer.Reset(interval)
@@ -142,13 +142,13 @@ func (h *taskHandle) stats(ctx context.Context, statsChannel chan *drivers.TaskR
 
 		pid, err := strconv.Atoi(h.Info.Pid)
 		if err != nil {
-			h.logger.Error("unable to convert pid ", h.Info.Pid, " to int from ", h.taskConfig.ID)
+			h.logger.Error("unable to convert pid to int", "pid", h.Info.Pid, "id", h.taskConfig.ID)
 			continue
 		}
 
 		p, err := process.NewProcess(int32(pid))
 		if err != nil {
-			h.logger.Error("unable create new process ", h.Info.Pid, " from ", h.taskConfig.ID)
+			h.logger.Error("unable create new process", "pid", h.Info.Pid, "id", h.taskConfig.ID)
 			continue
 		}
 		ms := &drivers.MemoryStats{}
@@ -223,7 +223,7 @@ func (h *taskHandle) shutdown(timeout time.Duration) error {
 	vnic, _ := netlink.LinkByName(h.Info.Vnic)
 	err := netlink.LinkDel(vnic)
 	if err != nil {
-		h.logger.Error("unable to remove veth ", h.Info.Vnic, " from ", h.taskConfig.ID)
+		h.logger.Error("unable to remove veth", "vnic", h.Info.Vnic, "id", h.taskConfig.ID)
 	}
 	time.Sleep(timeout)
 	h.MachineInstance.StopVMM()
